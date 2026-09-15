@@ -14,3 +14,11 @@
 | 10-client-ping-transit.png | Ping 10.255.0.1 depuis le client : 0 % de perte | Tests réalisés |
 | 11-fw-ext-interfaces-mode-route.png | 4 interfaces adressées, bridge supprimé (mode routé) | Plan d'adressage |
 | 12-fw-ext-passerelle-par-defaut.png | Passerelle par défaut gw_internet (192.36.253.1), routage statique | Routage (R19) |
+| 13-client-pings-interfaces-fw-ext.png | Pings vers dmz_relais, demo, out : OK ; vers 192.36.253.1 : échec attendu (pas de NAT) | Tests réalisés |
+| 14-fw-int-attribution-interfaces.png | pfSense : WAN=em0 (transit), LAN=em1, OPT1=em2, OPT2=em3, OPT3=em4 | Architecture / pare-feu interne |
+| 15-fw-int-wan-lan-adresses.png | pfSense : WAN 10.255.0.2/30 sans passerelle, LAN 10.10.10.254/24 | Plan d'adressage / R19 |
+| 16-fw-int-5-interfaces.png | pfSense : les 5 interfaces adressées (transit, LAN, SRV-APP, serveurs, admin) | Plan d'adressage |
+| 17-fw-int-ping-transit-echec.png | Ping pfSense vers 10.255.0.1 : « No route to host » | Difficultés rencontrées |
+| 18-fw-int-diagnostic-em0-sans-ipv4.png | Diagnostic : em0 sans adresse IPv4 malgré l'affichage du menu | Difficultés rencontrées |
+| 19-fw-int-em0-ipv4-apres-reboot.png | Après redémarrage : em0 porte bien 10.255.0.2/30 | Difficultés rencontrées |
+| 20-fw-int-ping-fw-ext-ok.png | Ping pfSense (10.255.0.2) vers MC-FW-EXT (10.255.0.1) : 3/3 | Tests réalisés |
