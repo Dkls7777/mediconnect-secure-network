@@ -1,0 +1,29 @@
+# Images et disques de VM
+*.ova
+*.ovf
+*.iso
+*.vdi
+*.vmdk
+*.vhd
+*.sav
+
+# Sauvegardes brutes de pare-feux (contiennent des secrets)
+*.na
+config-*.xml
+
+# Secrets
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.ovpn
+*.env
+.env
+secrets/
+
+# Divers
+*.log
+Thumbs.db
+.DS_Store
+~$*
