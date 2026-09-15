@@ -18,3 +18,22 @@
 
 **Prochaine étape**
 - MC-FW-EXT : passage en mode routé, adressage des 4 interfaces, route par défaut
+
+## 15/09/2026 (suite) : MC-FW-EXT en mode routé
+
+**Fait**
+- Dépôt GitHub privé créé et premier push
+- MC-FW-EXT : nom du pare-feu, mot de passe admin par défaut remplacé
+- Politique (10) Pass all activée **temporairement** (diagnostic)
+- Sortie du mode transparent : out 192.36.253.10/24 (External), dmz_relais 172.16.10.254/24, demo 172.16.30.254/24, transit 10.255.0.1/30 (Internal)
+- Suppression de `new_bridge1`
+- Test : ping du client (10.255.0.2, provisoire sur mc_transit) vers 10.255.0.1 : 3/3, 0 % de perte
+
+**Difficultés**
+- Erreur de chevauchement : l'adresse d'usine du bridge `10.0.0.254/8` couvre `10.255.0.1/30`. Résolu en supprimant le bridge vide avant l'APPLY.
+- Commandes Linux lancées par erreur hors de la VM : elles se tapent dans le terminal du client, pas dans PowerShell.
+
+**Reste à faire sur MC-FW-EXT**
+- Objet `gw_internet` (192.36.253.1) et passerelle par défaut
+- Pings vers les autres interfaces
+- Instantané `FW-EXT-INTERFACES`
