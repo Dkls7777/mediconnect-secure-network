@@ -22,3 +22,15 @@
 | 18-fw-int-diagnostic-em0-sans-ipv4.png | Diagnostic : em0 sans adresse IPv4 malgré l'affichage du menu | Difficultés rencontrées |
 | 19-fw-int-em0-ipv4-apres-reboot.png | Après redémarrage : em0 porte bien 10.255.0.2/30 | Difficultés rencontrées |
 | 20-fw-int-ping-fw-ext-ok.png | Ping pfSense (10.255.0.2) vers MC-FW-EXT (10.255.0.1) : 3/3 | Tests réalisés |
+| 21-fw-int-assistant-pfsense.png | Assistant pfSense : mot de passe par défaut signalé comme non sécurisé | Sécurisation de l'administration |
+| 22-fw-int-wan-transit-sans-passerelle.png | TRANSIT en statique, passerelle None, blocage des réseaux privés désactivé | Routage (R19) / justification |
+| 23-fw-int-5-interfaces-up.png | Les 5 interfaces du pare-feu interne actives avec leurs adresses | Zones de sécurité |
+| 24-fw-int-passerelle-sans-defaut.png | Passerelle GW_FW_EXT déclarée, routes par défaut IPv4 et IPv6 sur None (R19) | Routage |
+| 25-fw-int-routes-statiques.png | Les 4 routes statiques du pare-feu interne vers les zones derrière le pare-feu externe | Routage |
+| 26-client-pings-bout-en-bout-echec.png | Client vers pfSense OK, vers Stormshield et DMZ : échec | Difficultés rencontrées |
+| 27-fw-int-ping-source-transit-ok.png | Diagnostic A : ping pfSense source TRANSIT vers 10.255.0.1 : 3/3 | Méthode de diagnostic |
+| 28-fw-int-ping-source-lan-echec.png | Diagnostic B : ping pfSense source LAN vers 10.255.0.1 : 0/3 | Méthode de diagnostic |
+| 29-fw-ext-routes-objets-host-sans-masque.png | Routes créées avec des objets de type Host : colonne Address range sans masque | Difficultés rencontrées |
+| 30-fw-ext-alarme-ip-spoofing.png | Alarme Stormshield « IP address spoofing (type=1) » sur transit, action Block | Protection anti-usurpation / journalisation |
+| 31-fw-ext-objet-cree-en-host-par-erreur.png | Cause de la panne : formulaire Host, sans masque possible | Difficultés rencontrées |
+| 32-fw-ext-objet-network-correct.png | Correction : objet de type Network, 10.10.10.0/24 | Difficultés rencontrées |

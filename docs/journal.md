@@ -73,3 +73,27 @@
 **Prochaine étape**
 - Interface web du pfSense depuis le client (https://10.10.10.254), mot de passe admin, option « Block private networks » du WAN
 - Routes statiques croisées entre les deux pare-feux, puis test de bout en bout client vers DMZ
+
+## 01/10/2026 : pfSense finalisé et routes croisées
+
+**Fait**
+- pfSense : assistant web, nom MC-FW-INT, domaine mediconnect.lab, mot de passe admin par défaut remplacé
+- Interface WAN renommée TRANSIT : statique 10.255.0.2/30, passerelle None, « Block private networks » et « Block bogon networks » décochés (le transit est en adressage privé)
+- Interfaces OPT activées et renommées : SRV_APP, SERVEURS, ADMIN
+- Passerelle `GW_FW_EXT` (10.255.0.1) déclarée, **passerelles par défaut IPv4 et IPv6 sur None** (ANSSI R19) ; passerelles DHCP résiduelles supprimées
+- 4 routes statiques sur le pfSense via GW_FW_EXT : 172.16.10.0/24 (DMZ), 172.16.30.0/24 (DEMO), 10.60.0.0/24 (VPN), 10.20.10.0/24 (site B)
+- Stormshield : objet `gw_fw_int` (10.255.0.2) et routes retour vers net_lan_siege, net_serveurs, net_admin, net_srv_app via transit
+
+**Difficulté principale : usurpation d'adresse détectée par le Stormshield**
+- Symptôme : le client (10.10.10.2) joint le pfSense mais ni 10.255.0.1 ni la DMZ.
+- Méthode : ping depuis le pfSense avec source TRANSIT (3/3) puis source LAN (0/3). La panne est donc sur le retour, côté Stormshield.
+- Preuve : alarmes « IP address spoofing (type=1) », action Block, interface transit, aux heures exactes des pings.
+- Cause : les objets `net_*` avaient été créés en type Host au lieu de Network. Les routes ne couvraient qu'une adresse (colonne Address range sans masque), donc le Stormshield considérait 10.10.10.0/24 comme illégitime derrière transit.
+- Correction : suppression des routes et des objets, recréation en type Network avec masque /24.
+- Leçon : sur Stormshield, une route statique vers un réseau interne sert aussi à déclarer ce réseau comme légitime derrière l'interface (anti-usurpation).
+
+**Autre point**
+- Pour administrer le Stormshield avant d'avoir les routes retour, le client a été branché provisoirement sur la DMZ (172.16.10.2). À terme, l'administration passera uniquement par la zone ADMIN (R16).
+
+**À faire en premier la prochaine fois**
+- Vérifier que les 4 routes affichent bien un masque /24, puis test de bout en bout depuis le LAN : ping 10.255.0.1, 172.16.10.254, 172.16.30.254
