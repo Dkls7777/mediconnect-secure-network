@@ -173,3 +173,53 @@
 **Reste à faire**
 - Sorties vers Internet (mises à jour des serveurs, navigation des utilisateurs) : à traiter par un relais sortant, pas par du routage direct (R19)
 - Rechanger le mot de passe par défaut du pfSense
+
+## 03/10/2026 (soir) : site B et tunnel IPsec
+
+**Fait**
+- MC-FW-B mis en service : nom, mot de passe d'usine remplacé, sortie du bridge d'usine, `out` 192.36.253.20/24 (externe), `lan_site_b` 10.20.10.254/24 (interne), passerelle par défaut `gw_internet`
+- Tunnel IPsec site à site entre MC-FW-B (192.36.253.20) et MC-FW-EXT (192.36.253.10) : IKEv2, profil StrongEncryption, authentification par clé partagée
+- Périmètre du tunnel volontairement réduit : LAN du site B (10.20.10.0/24) vers la seule zone SERVEURS du siège (10.10.20.0/24)
+- Filtrage du site B, politique `MediConnect-B` : administration, HTTPS et ping vers la zone SERVEURS, blocage final journalisé
+- Pare-feu externe : deux règles ajoutées avant le blocage final, source `net_lan_site_b` acceptée uniquement « via IPsec VPN tunnel »
+- pfSense, interface TRANSIT : site B autorisé vers `SERVEURS subnets` en HTTPS (443) et en ICMP echo request, journalisé
+
+**Tests**
+
+| Source | Destination | Résultat |
+|---|---|---|
+| Poste site B 10.20.10.2 | 10.10.20.254 (zone SERVEURS) | 4/5, premier paquet perdu pendant la négociation du tunnel |
+
+**Points à retenir**
+- Le tunnel transporte, le filtrage autorise : trois équipements à ouvrir pour un seul flux (pare-feu du site B, pare-feu externe, pare-feu interne)
+- Sur Stormshield, la restriction au tunnel se règle dans Source, onglet Advanced properties, champ Via (et non dans la liste des interfaces)
+- La clé partagée n'est stockée nulle part dans le dépôt
+
+**Limite à mentionner dans le rapport**
+- Authentification par clé partagée, suffisante pour la maquette ; en production, authentification par certificats
+
+**Tests négatifs**
+
+| Source | Destination | Résultat |
+|---|---|---|
+| Poste site B | 10.10.10.254 (LAN du siège) | 100 % de perte |
+| Poste site B | 172.16.10.10 (DMZ) | 100 % de perte |
+
+**Correction d'un écart avec le cadrage : zone DEMO**
+- L'après-midi, la zone DEMO a été publiée sur Internet (adresse 192.36.253.13). C'est un écart : le cadrage prévoit que la DEMO n'est accessible qu'aux commerciaux, à travers le VPN d'accès distant (flux 8 de la matrice). Le sujet ne demande pas de l'exposer à tout Internet.
+- Décision : publication retirée (règle de NAT, règle de filtrage et adresse publique supprimées). La DEMO reste isolée et sera ouverte au seul groupe Commerciaux lors de la mise en place du VPN SSL.
+- Les captures 60 et 63 montrent l'état intermédiaire et ne sont pas à utiliser telles quelles dans le rapport. La capture 61 (isolement de la DEMO) reste valable.
+
+**Serveur interne et flux applicatif dans le tunnel**
+- `MC-SRV-INTERNE` : clone lié du modèle, zone SERVEURS, une adresse par application (CRM 10.10.20.20, comptabilité .30, support .40), un bloc nginx HTTPS par adresse. Ce découpage permettra de filtrer par groupe d'utilisateurs.
+- Supervision du tunnel sur le pare-feu externe : IKE established (AES-256, SHA-256, PFS groupe 28), SA IPsec installed (AES-256, HMAC-SHA256)
+- Depuis le poste du site B, les trois applications s'affichent en HTTPS à travers le tunnel
+
+**État en fin de séance**
+- Pare-feu externe : 9 règles de filtrage (dont 2 réservées au tunnel), 2 règles de NAT
+- VM du projet : MC-FW-EXT, MC-FW-INT, MC-FW-B, MC-SRV-RELAIS, MC-SRV-APP, MC-SRV-DEMO, MC-SRV-INTERNE, MC-Client-LAN, MC-Client-B
+
+**À faire ensuite**
+- VPN SSL d'accès distant, annuaire, droits par groupe (CRM et DEMO pour les commerciaux, comptabilité, support)
+- Restreindre l'accès du site B si tous ses utilisateurs n'ont pas besoin des trois applications
+- Refaire la capture de l'onglet NAT (2 règles) pour le rapport

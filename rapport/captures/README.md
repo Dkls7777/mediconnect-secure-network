@@ -61,7 +61,20 @@
 | 57-fw-ext-journal-admin-autorisee-depuis-lan.png | Journal : connexion d'administration autorisée depuis 10.10.10.2 | Journalisation |
 | 58-fw-ext-journal-blocage-ping-internet.png | Journal : ping de 192.36.253.100 vers pub_patients bloqué par la règle finale, interface out | Journalisation / tests réalisés |
 | 59-fw-int-passerelle-online-apres-regle-supervision.png | pfSense : passerelle GW_FW_EXT Online après ajout de la règle de supervision | Routage |
-| 60-demo-publiee-depuis-internet.png | Environnement de démonstration atteint depuis Internet (https://192.36.253.13), bandeau données fictives | Zone DEMO |
+| 60-demo-publiee-depuis-internet.png | État intermédiaire, publication retirée ensuite : la DEMO n'est accessible que par le VPN (voir journal du 03/10 soir). Utilisable seulement pour montrer la page | Zone DEMO |
 | 61-demo-isolement-aucun-flux-sortant.png | Depuis le serveur DEMO : aucun accès à la DMZ, à l'application ni au réseau interne | Zone DEMO / protection de la DMZ |
 | 62-fw-ext-politique-finale-8-regles.png | Politique MediConnect finale du pare-feu externe : 7 autorisations précises et un blocage final journalisé | Politique de filtrage |
-| 63-fw-ext-nat-3-publications.png | Les trois règles de NAT de publication : patients, médecins, démonstration | Exposition sécurisée de la plateforme |
+| 63-fw-ext-nat-3-publications.png | État intermédiaire avec trois règles de NAT ; la publication de la démonstration a été retirée ensuite, à refaire avec deux règles | Exposition sécurisée de la plateforme |
+| 64-fw-b-interfaces-mode-route.png | Pare-feu du site B en mode routé : out 192.36.253.20/24, lan_site_b 10.20.10.254/24 | Environnement de lab / site secondaire |
+| 65-fw-b-route-par-defaut.png | Site B : passerelle par défaut gw_internet | Routage |
+| 66-fw-b-tunnel-ipsec-cree.png | Site B : tunnel IPsec Network_lan_site_b vers net_serveurs_siege, correspondant Site_Siege, profil StrongEncryption | VPN IPsec site à site |
+| 67-fw-b-politique-filtrage-site-b.png | Site B : politique MediConnect-B, 3 autorisations et un blocage final journalisé | Politique de filtrage |
+| 68-fw-ext-politique-10-regles-avec-tunnel.png | Pare-feu externe : règles 8 et 9 n'acceptant le site B que via le tunnel IPsec | VPN IPsec site à site / politique de filtrage |
+| 69-fw-int-regles-transit-site-b.png | pfSense, interface TRANSIT : site B autorisé vers la zone SERVEURS en HTTPS et en ping | VPN IPsec site à site |
+| 70-site-b-ping-zone-serveurs-par-tunnel.png | Poste du site B : ping de la zone SERVEURS du siège à travers le tunnel (premier paquet perdu pendant la négociation) | Tests réalisés |
+| 71-site-b-tunnel-refuse-lan-et-dmz.png | Poste du site B : le LAN du siège et la DMZ restent injoignables, le tunnel est limité à la zone SERVEURS | Tests réalisés / VPN IPsec site à site |
+| 72-fw-ext-supervision-tunnel-ipsec-etabli.png | Supervision du tunnel : IKE established (AES-256, SHA-256, PFS groupe 28), SA IPsec installed (AES-256, HMAC-SHA256), octets échangés | VPN IPsec site à site |
+| 73-fw-ext-politique-9-regles-sans-demo.png | Politique du pare-feu externe après retrait de la publication DEMO : 9 règles, dont 2 réservées au tunnel IPsec | Politique de filtrage |
+| 74-site-b-crm-par-tunnel.png | Poste du site B : application CRM de la zone SERVEURS (https://10.10.20.20) affichée à travers le tunnel IPsec | VPN IPsec site à site / tests réalisés |
+| 75-site-b-comptabilite-par-tunnel.png | Poste du site B : application de comptabilité (https://10.10.20.30) à travers le tunnel | VPN IPsec site à site |
+| 76-site-b-support-par-tunnel.png | Poste du site B : application de support (https://10.10.20.40) à travers le tunnel | VPN IPsec site à site |

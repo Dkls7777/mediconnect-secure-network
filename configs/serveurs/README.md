@@ -24,7 +24,7 @@ Sur chaque clone, une seule commande fixe le nom, l'adresse, le certificat et la
 sudo mc-role relais    # 172.16.10.10 (patients) et .11 (medecins), zone DMZ relais
 sudo mc-role app       # 172.16.20.10, zone SRV-APP
 sudo mc-role demo      # 172.16.30.10, zone DEMO
-sudo mc-role interne   # 10.10.20.10, zone serveurs
+sudo mc-role interne   # 10.10.20.10, plus .20 CRM, .30 compta, .40 support, zone serveurs
 sudo mc-role admin     # 10.10.99.10, zone administration
 ```
 

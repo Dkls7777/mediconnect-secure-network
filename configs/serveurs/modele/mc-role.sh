@@ -8,7 +8,7 @@ case "$ROLE" in
   relais)  HN=mc-srv-relais;  IP=172.16.10.10/24; GW=172.16.10.254; ALIAS=172.16.10.11/24; DNS=172.16.10.53 ;;
   app)     HN=mc-srv-app;     IP=172.16.20.10/24; GW=172.16.20.254; DNS=10.10.20.53 ;;
   demo)    HN=mc-srv-demo;    IP=172.16.30.10/24; GW=172.16.30.254; DNS=172.16.10.53 ;;
-  interne) HN=mc-srv-interne; IP=10.10.20.10/24;  GW=10.10.20.254;  DNS=10.10.20.53 ;;
+  interne) HN=mc-srv-interne; IP=10.10.20.10/24;  GW=10.10.20.254;  ALIAS="10.10.20.20/24 10.10.20.30/24 10.10.20.40/24"; DNS=10.10.20.53 ;;
   admin)   HN=mc-srv-admin;   IP=10.10.99.10/24;  GW=10.10.99.254;  DNS=10.10.20.53 ;;
   *) echo "Usage : sudo mc-role relais | app | demo | interne | admin"; exit 1 ;;
 esac
@@ -37,7 +37,7 @@ iface $IF inet static
     address $IP
     gateway $GW
 NET
-[ -n "$ALIAS" ] && echo "    up ip addr add $ALIAS dev $IF" >> /etc/network/interfaces
+for A in $ALIAS; do echo "    up ip addr add $A dev $IF" >> /etc/network/interfaces; done
 echo "nameserver $DNS" > /etc/resolv.conf
 
 # Certificat auto-signe propre a ce serveur
@@ -68,6 +68,14 @@ case "$ROLE" in
     mkdir -p /var/www/demo && cp -r /opt/mediconnect/www/demo/. /var/www/demo/
     chmod -R a+rX /var/www/demo
     cp /opt/mediconnect/nginx/demo.conf /etc/nginx/sites-enabled/
+    ;;
+  interne)
+    # Un seul serveur porte les trois applications internes, une adresse par application
+    mkcert interne interne.mediconnect.lab "DNS:interne.mediconnect.lab,IP:10.10.20.20,IP:10.10.20.30,IP:10.10.20.40"
+    mkdir -p /var/www/interne && cp -r /opt/mediconnect/www/interne/. /var/www/interne/
+    chmod -R a+rX /var/www/interne
+    cp /opt/mediconnect/nginx/interne.conf /etc/nginx/sites-enabled/
+    echo "net.ipv4.ip_nonlocal_bind=1" > /etc/sysctl.d/90-mediconnect.conf
     ;;
 esac
 
