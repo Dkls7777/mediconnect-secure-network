@@ -63,3 +63,5 @@
 | 59-fw-int-passerelle-online-apres-regle-supervision.png | pfSense : passerelle GW_FW_EXT Online après ajout de la règle de supervision | Routage |
 | 60-demo-publiee-depuis-internet.png | Environnement de démonstration atteint depuis Internet (https://192.36.253.13), bandeau données fictives | Zone DEMO |
 | 61-demo-isolement-aucun-flux-sortant.png | Depuis le serveur DEMO : aucun accès à la DMZ, à l'application ni au réseau interne | Zone DEMO / protection de la DMZ |
+| 62-fw-ext-politique-finale-8-regles.png | Politique MediConnect finale du pare-feu externe : 7 autorisations précises et un blocage final journalisé | Politique de filtrage |
+| 63-fw-ext-nat-3-publications.png | Les trois règles de NAT de publication : patients, médecins, démonstration | Exposition sécurisée de la plateforme |
