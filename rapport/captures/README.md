@@ -34,3 +34,19 @@
 | 30-fw-ext-alarme-ip-spoofing.png | Alarme Stormshield « IP address spoofing (type=1) » sur transit, action Block | Protection anti-usurpation / journalisation |
 | 31-fw-ext-objet-cree-en-host-par-erreur.png | Cause de la panne : formulaire Host, sans masque possible | Difficultés rencontrées |
 | 32-fw-ext-objet-network-correct.png | Correction : objet de type Network, 10.10.10.0/24 | Difficultés rencontrées |
+| 33-fw-ext-routes-retour-avec-masque.png | Routes retour corrigées : 4 réseaux en /24 via transit et gw_fw_int | Routage |
+| 34-client-pings-bout-en-bout-ok.png | Test de bout en bout : le client du LAN joint le pfSense, le Stormshield, la DMZ et la DEMO (TTL 63 = un saut par le pfSense) | Tests réalisés |
+| 35-debian-selection-logiciels-minimale.png | Serveur modèle Debian : installation minimale, sans bureau (réduction de la surface d'attaque) | Environnement de lab |
+| 36-fw-int-regle-transit-rp-vers-app.png | pfSense, interface TRANSIT : seule règle autorisée, RP_DMZ vers SRV-APP en TCP 8443 | Politique de filtrage / protection de la DMZ |
+| 37-portail-patients-via-reverse-proxy.png | Portail patients servi par SRV-APP à travers le reverse proxy de la DMZ (https://172.16.10.10) | Exposition sécurisée de la plateforme |
+| 38-chaine-patients-refuse-espace-pro-403.png | La chaîne patients refuse l'espace professionnel (403) : séparation des chaînes, ANSSI R6 | Protection de la DMZ |
+| 39-srv-app-droits-dossier-pro-corriges.png | Dossier pro en drwx------ (illisible par nginx) corrigé en drwxr-xr-x | Difficultés rencontrées |
+| 40-espace-medecins-via-reverse-proxy.png | Espace professionnel servi par la chaîne médecins (https://172.16.10.11/pro/) | Accès authentifié des médecins |
+| 41-fw-ext-nat-avant.png | Stormshield, onglet NAT avant publication : une seule règle d'usine désactivée | Exposition sécurisée de la plateforme |
+| 42-fw-ext-nat-edition-regle.png | Fenêtre d'édition d'une règle de NAT (destination d'origine, destination translatée) | Exposition sécurisée de la plateforme |
+| 43-fw-ext-nat-publication.png | Les deux règles de publication : pub_patients vers srv_rp_patients et pub_medecins vers srv_rp_medecins, HTTPS uniquement | Exposition sécurisée de la plateforme |
+| 44-client-externe-pings-adresses-publiques.png | Client externe (192.36.253.100) : le pare-feu répond sur ses trois adresses publiques .10, .11, .12 | Tests réalisés |
+| 45-admin-fw-ext-refusee-depuis-internet.png | Interface d'administration du Stormshield refusée depuis Internet (Forbidden) : ANSSI R16 | Administration sécurisée |
+| 46-espace-medecins-depuis-internet.png | Espace professionnel atteint depuis Internet par l'adresse publique médecins (https://192.36.253.12/pro/) | Accès authentifié des médecins |
+| 47-chaine-patients-internet-refuse-pro-403.png | Depuis Internet, la chaîne patients refuse l'espace professionnel (403) : séparation des chaînes, ANSSI R6 | Protection de la DMZ |
+| 48-portail-patients-depuis-internet.png | Portail patients atteint depuis Internet par l'adresse publique patients (https://192.36.253.11) | Exposition sécurisée de la plateforme |

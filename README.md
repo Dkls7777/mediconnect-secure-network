@@ -69,8 +69,8 @@ Voir [docs/journal.md](docs/journal.md).
 | Phase | Statut |
 |---|---|
 | 1. Cadrage (besoins, zones, adressage, matrice des flux) | Fait |
-| 2. Socle lab (VM, réseaux, interfaces, routage) | En cours : MC-FW-EXT en mode routé |
-| 3. DMZ, reverse proxies, zone DEMO | À faire |
+| 2. Socle lab (VM, réseaux, interfaces, routage) | Fait pour le siège (site B à faire) |
+| 3. DMZ, reverse proxies, zone DEMO | En cours : portail et espace pro publiés sur Internet, filtrage restrictif à faire |
 | 4. VPN IPsec site à site | À faire |
 | 5. VPN SSL, annuaire, règles par identité, MFA | À faire |
 | 6. Administration sécurisée (bastion) | À faire |

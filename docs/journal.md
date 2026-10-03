@@ -97,3 +97,43 @@
 
 **À faire en premier la prochaine fois**
 - Vérifier que les 4 routes affichent bien un masque /24, puis test de bout en bout depuis le LAN : ping 10.255.0.1, 172.16.10.254, 172.16.30.254
+
+## 03/10/2026 : serveurs, reverse proxies et publication sur Internet
+
+**Fait**
+- Test de bout en bout validé depuis le LAN : pfSense, Stormshield, DMZ et DEMO joignables (TTL 63, un saut par le pfSense)
+- Serveur modèle `MC-DEB-TEMPLATE` (Debian 13, installation minimale sans bureau), scripts `install-modele.sh` et `mc-role.sh`, instantané `MODELE-PRET`
+- Trois clones liés de 512 Mo : `MC-SRV-RELAIS` (172.16.10.10 et .11), `MC-SRV-APP` (172.16.20.10), `MC-SRV-DEMO` (172.16.30.10)
+- Deux reverse proxies nginx sur le relais, une adresse d'écoute par chaîne : patients (.10) et médecins (.11), tous deux en HTTPS vers SRV-APP:8443
+- SRV-APP n'accepte que les deux relais (`allow` / `deny all`)
+- pfSense : alias `RP_DMZ`, une seule règle sur TRANSIT (RP_DMZ vers 172.16.20.10 en TCP 8443, journalisée)
+- Stormshield : adresses publiques 192.36.253.11 et .12 ajoutées sur `out`, objets `pub_patients`, `pub_medecins`, `srv_rp_patients`, `srv_rp_medecins`, deux règles de NAT de destination limitées à HTTPS et à l'interface `out`
+
+**Tests**
+
+| Source | Destination | Résultat attendu | Résultat |
+|---|---|---|---|
+| Client LAN 10.10.10.2 | https://172.16.10.10 | Portail patients | OK |
+| Client LAN 10.10.10.2 | https://172.16.10.11/pro/ | Espace pro | OK |
+| Client externe 192.36.253.100 | ping .10, .11, .12 | Réponse | 2/2 sur chaque adresse |
+| Client externe | https://192.36.253.11 | Portail patients | OK |
+| Client externe | https://192.36.253.12/pro/ | Espace pro | OK |
+| Client externe | https://192.36.253.11/pro/ | Refus | 403 |
+| Client externe | https://192.36.253.10/admin | Refus | Forbidden |
+
+**Recommandations ANSSI illustrées**
+- R2, R3, R13 : le flux traverse deux pare-feux de technologies différentes
+- R6 : deux chaînes distinctes (adresse publique, relais et règle propres à chaque population), la chaîne patients refuse `/pro/`
+- R7 : seul le relais initie un flux vers SRV-APP, sur un port unique
+- R8 : rupture protocolaire, le relais termine le TLS et rouvre une session vers l'application
+- R16 : l'administration du pare-feu externe n'est pas servie côté Internet
+
+**Difficultés**
+- `nginx -t` échouait sur le relais tant que la seconde adresse n'existait pas : test rendu non bloquant dans `mc-role.sh`
+- 403 sur l'espace pro : dossier `/var/www/mediconnect/pro` en `drwx------` (droits hérités de la copie depuis Windows), corrigé par `chmod -R a+rX` et intégré aux scripts
+- Mot de passe pfSense oublié : réinitialisé par la console (option 3), à rechanger
+
+**Reste à faire sur cette phase**
+- Remplacer la politique (10) Pass all par un filtrage restrictif (DROP par défaut côté Internet, ANSSI R20)
+- Vérifier la zone DEMO et son isolement
+- NAT sortant et masquage (R21)
