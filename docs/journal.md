@@ -133,7 +133,43 @@
 - 403 sur l'espace pro : dossier `/var/www/mediconnect/pro` en `drwx------` (droits hérités de la copie depuis Windows), corrigé par `chmod -R a+rX` et intégré aux scripts
 - Mot de passe pfSense oublié : réinitialisé par la console (option 3), à rechanger
 
-**Reste à faire sur cette phase**
-- Remplacer la politique (10) Pass all par un filtrage restrictif (DROP par défaut côté Internet, ANSSI R20)
-- Vérifier la zone DEMO et son isolement
-- NAT sortant et masquage (R21)
+**Politique de filtrage du pare-feu externe (fin d'après-midi)**
+- Politique (10) renommée `MediConnect`, copie de secours conservée dans (5) Pass all
+- 8 règles, de la plus précise à la plus générale :
+
+| N° | Source | Destination | Service | Action | Rôle |
+|---|---|---|---|---|---|
+| 1 | net_lan_siege, net_admin | Firewall_transit | https | pass | Administration (LAN provisoire, à terme zone ADMIN) |
+| 2 | Any, interface out | pub_patients | https | pass | Portail patients |
+| 3 | Any, interface out | pub_medecins | https | pass | Espace médecins |
+| 4 | Any, interface out | pub_demo | https | pass | Environnement de démonstration |
+| 5 | srv_rp_patients, srv_rp_medecins | srv_app | TCP 8443 | pass | Relais vers application (R7) |
+| 6 | net_lan_siege, net_admin | Any | ICMP echo | pass | Diagnostic |
+| 7 | gw_fw_int | Firewall_transit | ICMP echo | pass | Supervision de passerelle par le pfSense |
+| 8 | Any | Any | Any | block, journalisé | Blocage silencieux (R20) |
+
+- Les règles de filtrage visent l'adresse publique (`pub_*`) : sur Stormshield le filtrage est évalué avant le NAT
+- Zone DEMO publiée sur une adresse dédiée 192.36.253.13 (objets `pub_demo`, `srv_demo`, règle de NAT et règle de filtrage propres)
+
+**Tests après durcissement**
+
+| Source | Test | Résultat |
+|---|---|---|
+| Client externe | https://192.36.253.11 et https://192.36.253.12/pro/ | OK |
+| Client externe | ping 192.36.253.11 | 100 % de perte, tentative journalisée (règle de blocage, interface out) |
+| Client externe | https://192.36.253.10/admin | Aucune réponse (avant : Forbidden) |
+| Client externe | https://192.36.253.13 | Page de démonstration |
+| Serveur DEMO | curl vers 172.16.10.10 et 172.16.20.10:8443, ping 10.10.10.254 | Délai dépassé, 100 % de perte |
+| pfSense | État de la passerelle GW_FW_EXT | Online |
+
+**Flux oublié révélé par les journaux**
+- Après activation, un blocage toutes les demi-secondes en ICMP sur `transit` : le pfSense surveille sa passerelle par ping. Flux légitime absent de la matrice, ajouté par une règle dédiée (source `gw_fw_int` uniquement).
+- Leçon : une politique restrictive associée à la journalisation fait apparaître les flux réels, la matrice se corrige à partir des journaux.
+
+**Autres points**
+- Journaux Stormshield anonymisés par défaut (protection des données personnelles) : accès complet à demander explicitement par l'administrateur
+- Une seule session d'administration a le droit d'écriture à la fois (seconde session en lecture seule)
+
+**Reste à faire**
+- Sorties vers Internet (mises à jour des serveurs, navigation des utilisateurs) : à traiter par un relais sortant, pas par du routage direct (R19)
+- Rechanger le mot de passe par défaut du pfSense

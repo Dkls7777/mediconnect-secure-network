@@ -50,3 +50,16 @@
 | 46-espace-medecins-depuis-internet.png | Espace professionnel atteint depuis Internet par l'adresse publique médecins (https://192.36.253.12/pro/) | Accès authentifié des médecins |
 | 47-chaine-patients-internet-refuse-pro-403.png | Depuis Internet, la chaîne patients refuse l'espace professionnel (403) : séparation des chaînes, ANSSI R6 | Protection de la DMZ |
 | 48-portail-patients-depuis-internet.png | Portail patients atteint depuis Internet par l'adresse publique patients (https://192.36.253.11) | Exposition sécurisée de la plateforme |
+| 49-fw-ext-politique-filtrage-mediconnect.png | Politique MediConnect, première version : 5 règles d'autorisation et un blocage final journalisé | Politique de filtrage |
+| 50-fw-ext-objet-port-app-8443.png | Création de l'objet port app_8443 (TCP 8443) | Politique de filtrage |
+| 51-filtrage-ping-internet-sans-reponse.png | Depuis Internet, le ping des adresses publiques reste sans réponse (blocage silencieux, ANSSI R20) | Tests réalisés |
+| 52-filtrage-portail-patients-toujours-ok.png | Le portail patients reste joignable après durcissement | Tests réalisés |
+| 53-filtrage-espace-medecins-toujours-ok.png | L'espace médecins reste joignable après durcissement | Tests réalisés |
+| 54-filtrage-admin-internet-sans-reponse.png | L'administration du pare-feu ne répond plus du tout depuis Internet (avant : Forbidden) | Administration sécurisée |
+| 55-fw-ext-journal-blocages-regle-6.png | Journal : pings du pfSense vers sa passerelle bloqués par la règle finale, flux légitime oublié dans la matrice | Difficultés rencontrées / journalisation |
+| 56-fw-ext-politique-filtrage-7-regles.png | Politique MediConnect avec la règle de supervision de passerelle ajoutée (7 règles) | Politique de filtrage |
+| 57-fw-ext-journal-admin-autorisee-depuis-lan.png | Journal : connexion d'administration autorisée depuis 10.10.10.2 | Journalisation |
+| 58-fw-ext-journal-blocage-ping-internet.png | Journal : ping de 192.36.253.100 vers pub_patients bloqué par la règle finale, interface out | Journalisation / tests réalisés |
+| 59-fw-int-passerelle-online-apres-regle-supervision.png | pfSense : passerelle GW_FW_EXT Online après ajout de la règle de supervision | Routage |
+| 60-demo-publiee-depuis-internet.png | Environnement de démonstration atteint depuis Internet (https://192.36.253.13), bandeau données fictives | Zone DEMO |
+| 61-demo-isolement-aucun-flux-sortant.png | Depuis le serveur DEMO : aucun accès à la DMZ, à l'application ni au réseau interne | Zone DEMO / protection de la DMZ |
