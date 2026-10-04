@@ -78,3 +78,18 @@
 | 74-site-b-crm-par-tunnel.png | Poste du site B : application CRM de la zone SERVEURS (https://10.10.20.20) affichée à travers le tunnel IPsec | VPN IPsec site à site / tests réalisés |
 | 75-site-b-comptabilite-par-tunnel.png | Poste du site B : application de comptabilité (https://10.10.20.30) à travers le tunnel | VPN IPsec site à site |
 | 76-site-b-support-par-tunnel.png | Poste du site B : application de support (https://10.10.20.40) à travers le tunnel | VPN IPsec site à site |
+| 77-fw-ext-annuaire-utilisateurs-et-groupes.png | Annuaire mediconnect.lab du pare-feu externe : 4 utilisateurs de test et 4 groupes (commerciaux, comptabilite, support, administrateurs) | Accès distant / contrôle d'accès par identité |
+| 78-fw-ext-service-vpn-ssl.png | Service VPN SSL du pare-feu externe : adresse publique 192.36.253.10, ressources vpn_ressources, pools UDP et TCP dans 10.60.0.0/24 | VPN SSL d'accès distant |
+| 79-fw-ext-politique-authentification.png | Politique d'authentification : utilisateurs de mediconnect.lab autorisés à s'authentifier depuis l'interface out, méthode LDAP | VPN SSL d'accès distant |
+| 80-fw-ext-droits-vpn-ssl-par-groupe.png | Droits d'accès détaillés : VPN SSL autorisé pour les quatre groupes, portail et IPsec bloqués | Contrôle d'accès par identité |
+| 81-fw-ext-portail-authentification-out.png | Portail d'authentification associé à l'interface out, profil External, annuaire mediconnect.lab | VPN SSL d'accès distant |
+| 82-fw-ext-politique-12-regles-haut.png | Politique finale du pare-feu externe, règles 1 à 7 en pleine largeur, sources, destinations et commentaires lisibles | Politique de filtrage (capture de référence) |
+| 83-fw-ext-politique-12-regles-bas-groupes-vpn.png | Politique finale, règles 5 à 12 : tunnel IPsec, puis une règle par groupe d'utilisateurs via le VPN SSL, puis blocage final | Contrôle d'accès par identité (capture de référence) |
+| 84-fw-int-regles-transit-avec-nomades.png | pfSense, interface TRANSIT : relais vers application, site B, puis nomades du VPN SSL vers la zone SERVEURS en HTTPS | Protection de la DMZ / VPN SSL d'accès distant |
+| 85-portail-authentification-depuis-internet.png | Portail d'authentification du pare-feu externe atteint depuis Internet (https://192.36.253.10/auth) | VPN SSL d'accès distant |
+| 86-fw-ext-journal-vpn-access-denied-by-uac.png | Journal VPN : connexion de lea.martin refusée, « Access denied by UAC » (droits d'accès) et « bad password », plus les événements du tunnel IPsec | Difficultés rencontrées / journalisation |
+| 87-fw-ext-journal-tous-evenements-lea.png | Journal complet filtré sur lea : connexions au portail, flux OpenVPN UDP 1194 autorisés par règle implicite, refus d'authentification | Journalisation |
+| 88-vpn-ssl-lea-commerciale-acces-crm.png | Nomade connectée en VPN SSL (lea.martin, groupe commerciaux, adresse 10.60.0.6) : le CRM s'affiche | VPN SSL d'accès distant / contrôle d'accès par identité |
+| 89-vpn-ssl-lea-commerciale-acces-demo.png | Même session VPN : la zone DEMO s'affiche pour la commerciale (accessible uniquement par le VPN, jamais depuis Internet) | Zone DEMO / contrôle d'accès par identité |
+| 90-fw-ext-supervision-tunnel-vpn-ssl-lea.png | Supervision des tunnels VPN SSL : lea.martin, annuaire mediconnect.lab, adresse VPN 10.60.0.6, adresse réelle 192.36.253.100, tunnel UDP | VPN SSL d'accès distant |
+| 91-vpn-ssl-lea-comptabilite-refusee.png | Même session VPN : l'application de comptabilité (10.10.20.30) reste inaccessible à la commerciale | Contrôle d'accès par identité / tests réalisés |

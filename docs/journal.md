@@ -223,3 +223,46 @@
 - VPN SSL d'accès distant, annuaire, droits par groupe (CRM et DEMO pour les commerciaux, comptabilité, support)
 - Restreindre l'accès du site B si tous ses utilisateurs n'ont pas besoin des trois applications
 - Refaire la capture de l'onglet NAT (2 règles) pour le rapport
+
+## 04/10/2026 (nuit) : VPN SSL d'accès distant et droits par groupe
+
+**Fait**
+- Annuaire dédié aux accès distants sur le pare-feu externe (`mediconnect.lab`), distinct de l'annuaire interne (ANSSI R10) : 4 utilisateurs de test, 4 groupes (commerciaux, comptabilite, support, administrateurs)
+- Service VPN SSL : adresse publique 192.36.253.10, ports TCP 443 et UDP 1194, ressources `vpn_ressources` (zone SERVEURS et serveur DEMO), adresses des nomades dans 10.60.0.0/24 (moitié UDP, moitié TCP)
+- Authentification : portail associé à l'interface `out`, politique LDAP pour les utilisateurs de `mediconnect.lab`
+- Droits d'accès : VPN SSL refusé par défaut, autorisé explicitement
+- Filtrage par identité sur le pare-feu externe, source « via SSL VPN tunnel » :
+
+| N° | Groupe | Destination | Service |
+|---|---|---|---|
+| 9 | commerciaux | srv_crm, srv_demo | https |
+| 10 | comptabilite | srv_compta | https |
+| 11 | support | srv_support | https |
+| 12 | (tous) | tout | blocage journalisé |
+
+- pfSense, interface TRANSIT : adresses des nomades (10.60.0.0/24) autorisées vers la zone SERVEURS en HTTPS. Le pare-feu externe trie par identité, le pare-feu interne par réseau source.
+- Profil OpenVPN exporté depuis l'administration du pare-feu (le portail de cette version ne le distribue pas), récupéré par le poste pendant qu'il était sur le LAN. Le fichier n'est pas versionné.
+
+**Tests, poste nomade 192.36.253.100, utilisatrice lea.martin (commerciaux), adresse VPN 10.60.0.6**
+
+| Destination | Attendu | Résultat |
+|---|---|---|
+| CRM https://10.10.20.20 | Autorisé | OK |
+| DEMO https://172.16.30.10 | Autorisé | OK |
+| Comptabilité https://10.10.20.30 | Refusé | Délai dépassé |
+| Support https://10.10.20.40 | Refusé | Délai dépassé |
+
+**Difficulté : « Access denied by UAC »**
+- Symptôme : OpenVPN renvoie AUTH_FAILED alors que le même compte se connecte au portail.
+- Méthode : le journal Users ne contenait aucune trace des tentatives VPN, le refus venait donc du service VPN. Le journal VPN donne la raison : « Error during authentication : Access denied by UAC ».
+- Constat : le droit VPN SSL accordé au groupe `commerciaux` n'est pas pris en compte, alors que l'utilisatrice en est bien membre. Un droit accordé directement à `lea.martin` fonctionne.
+- État : contournement par droit individuel pour lea.martin. À reprendre : comprendre pourquoi le droit de groupe n'est pas appliqué, ou accorder le droit VPN par utilisateur et garder les groupes pour le filtrage (qui, lui, reconnaît bien les groupes).
+
+**Autres points**
+- Zone DEMO injoignable au premier test : le serveur était resté en pause depuis 22 h. Rallumé, la page s'affiche.
+- L'horloge du pare-feu externe retarde d'environ 5 heures : à corriger avant la phase journalisation.
+
+**À faire ensuite**
+- Captures : comptabilité refusée, supervision des tunnels VPN SSL
+- Tester marc.petit et ines.roux (droits croisés), traiter le groupe administrateurs avec le bastion
+- MFA des médecins
