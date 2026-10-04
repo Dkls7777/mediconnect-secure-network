@@ -262,7 +262,52 @@
 - Zone DEMO injoignable au premier test : le serveur était resté en pause depuis 22 h. Rallumé, la page s'affiche.
 - L'horloge du pare-feu externe retarde d'environ 5 heures : à corriger avant la phase journalisation.
 
+**Suite, dimanche 04/10 après-midi**
+- Droit VPN SSL accordé individuellement à marc.petit, ines.roux et paul.admin. Répartition retenue : le droit de se connecter au VPN est donné par utilisateur, le droit d'atteindre une application est donné par groupe dans le filtrage.
+- Test croisé avec marc.petit (groupe comptabilite), même poste et même profil que lea.martin :
+
+| Destination | lea.martin (commerciaux) | marc.petit (comptabilite) |
+|---|---|---|
+| CRM 10.10.20.20 | OK | Refusé |
+| DEMO 172.16.30.10 | OK | Refusé |
+| Comptabilité 10.10.20.30 | Refusé | OK |
+| Support 10.10.20.40 | Refusé | non testé |
+
+- Piège rencontré : une session OpenVPN restée active après la mise en pause de la VM. Une seconde session par-dessus échoue à poser ses routes (« route add command failed: File exists ») et rien ne charge. Toujours arrêter l'ancienne session (`sudo killall openvpn`) avant d'en ouvrir une autre.
+
 **À faire ensuite**
-- Captures : comptabilité refusée, supervision des tunnels VPN SSL
-- Tester marc.petit et ines.roux (droits croisés), traiter le groupe administrateurs avec le bastion
+- Groupe administrateurs : bastion et administration séparée
 - MFA des médecins
+
+## 04/10/2026 (soir) : bastion et administration séparée
+
+**Objectif** : exigence du sujet, « un utilisateur connecté au LAN ne doit pas pouvoir administrer directement les équipements » ; ANSSI R16.
+
+**Fait**
+- `MC-SRV-ADMIN` : bastion dans la zone ADMIN (10.10.99.10), clone lié du modèle
+- pfSense, interface ADMIN : le bastion est seul autorisé vers l'administration du pare-feu interne (443), du pare-feu externe (10.255.0.1:443) et vers le SSH de la zone SERVEURS
+- Méthode d'administration : rebond SSH avec redirection dynamique (`ssh -D 1080 -N mcadmin@10.10.99.10`), le navigateur du poste d'administration utilise ce tunnel comme proxy SOCKS
+- Pare-feu externe : seul `srv_bastion` figure dans les hôtes autorisés à l'administration ; règle de filtrage n° 1 réduite à cette source ; délai d'inactivité des sessions d'administration limité ; protection contre la force brute active
+- Pare-feu interne : règle de secours « anti-lockout » désactivée ; sur l'interface LAN, dans l'ordre : poste d'administration (10.10.10.2) vers bastion en SSH autorisé, zone ADMIN interdite au LAN, administration du pare-feu interne interdite, administration du pare-feu externe interdite
+
+**Ordre suivi pour ne pas se couper l'accès** : instantanés, ouverture et test du chemin par le bastion, bascule de la session d'administration sur ce chemin, puis fermeture de l'accès direct.
+
+**Tests**
+
+| Source | Destination | Résultat |
+|---|---|---|
+| Bastion | Administration des deux pare-feux | HTTP 200 |
+| Poste d'administration via le bastion | https://10.255.0.1/admin et https://10.10.99.254 | OK, sessions vues depuis 10.10.99.10 |
+| Poste du LAN, sans bastion | https://10.10.10.254, https://10.10.99.254, https://10.255.0.1/admin | Aucune réponse (code 000) |
+
+**Preuves dans les journaux**
+- Pare-feu externe, événements système : « Starting an administrative intervention (10.10.99.10) », la précédente venait de 10.10.10.2
+- Pare-feu interne : session affichée comme `admin@10.10.99.10`
+
+**Limites à mentionner**
+- Authentification du bastion par mot de passe ; en production, clés SSH et second facteur, journalisation des sessions
+- Les serveurs de la DMZ ne sont pas encore administrables depuis le bastion
+
+**À faire ensuite**
+- Groupe administrateurs du VPN SSL : accès au bastion uniquement
+- Synchroniser les horloges des pare-feux (décalées après les mises en pause)
