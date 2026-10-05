@@ -416,3 +416,36 @@ Le journal du portail (`/var/log/mediconnect/mfa.log`) trace chaque tentative av
 | 10.60.0.0/24 | SERVEURS | TCP 443 | Nomades VPN SSL |
 | 10.60.0.0/24 | 10.10.99.10 | TCP 22 | Administrateurs VPN vers bastion |
 | 10.255.0.1 | 10.10.99.20 | UDP 514 | Journaux du pare-feu externe |
+
+---
+
+## Nuit du 5 au 6 octobre : tests d'attaque depuis Kali
+
+Objectif : valider la sécurisation du point de vue d'un attaquant externe. Une machine Kali est placée sur l'Internet simulé (réseau NAT NatMediConnect), en 192.36.253.66/24, face à la zone publique du pare-feu externe (192.36.253.10 à .12).
+
+Préparation : remise à l'heure du collecteur et relance de rsyslog (écoute sur 10.10.99.20:514, un fichier par équipement émetteur), bascule de la carte réseau de Kali sur NatMediConnect puis attribution d'une adresse fixe 192.36.253.66/24. Configuration réseau d'origine de Kali relevée au préalable (nic1 = nat) pour pouvoir la restaurer.
+
+### Scénarios et résultats
+
+| # | Test | Commande | Résultat | Ce que ça prouve |
+|---|---|---|---|---|
+| 1 | Scan de ports des portails publiés | `nmap -Pn -sS --top-ports 1000 .11 .12` | Seul 443/tcp ouvert, 998 ports filtered, même MAC sur les deux IP | Surface minimale, DROP silencieux (R20), serveur applicatif invisible |
+| 2 | Scan du pare-feu et de l'ancienne DEMO | `nmap -Pn -sS --top-ports 1000 .10 .13` | .13 injoignable, .10 n'expose que le 443 du portail VPN | DEMO non publiée, interface d'administration non exposée |
+| 3 | Détection de version | `nmap -Pn -sV -p 443 .10 .11 .12` | .11/.12 = nginx sans version, .10 = portail (redirection /auth/) | Masquage des services, reverse proxy seul visible |
+| 4 | Contrôle d'accès HTTP | `curl -k -I` sur /, /pro/, /admin/ | Médecins /pro 302 vers /mfa/login, patients /pro 403, /admin 403 | MFA obligatoire, cloisonnement, administration verrouillée (R16) |
+| 5 | Force brute du portail MFA | boucle `curl --data` sur /mfa/login | 5 x 401 puis 429 | Anti-bruteforce (5 échecs, blocage 5 min) |
+
+### Preuves côté défense
+
+Journal centralisé (collecteur 10.10.99.20, fichier 10.255.0.1.log) : 6067 événements liés à l'attaquant 192.36.253.66, dont 5986 paquets bloqués et seulement 81 connexions autorisées (443). Une des lignes de blocage est une alarme IPS (SSL version mismatch, alarmid 117) déclenchée par la détection de version de nmap. Capture 129.
+
+Journal MFA sur le relais (/var/log/mediconnect/mfa.log) : 5 LOGIN_FAIL pour dr.dupont depuis 192.36.253.66, puis blocage 300 s et LOGIN_BLOCKED. Le même compte avait réussi ses connexions légitimes depuis le client mobile (192.36.253.100) lors des tests VPN : l'utilisateur légitime passe, l'attaquant est bloqué. Capture 130.
+
+Captures 124 à 130.
+
+### Difficultés et limites relevées
+
+- Le DHCP du réseau NAT n'a pas attribué d'adresse à Kali : adresse fixe posée à la main (plus propre pour identifier l'attaquant dans les journaux).
+- La VM du relais, mise en pause puis reprise plusieurs fois, a présenté des soft lockup et un watchdog timeout (sauts d'horloge). Redémarrage à froid nécessaire ; le journal MFA, écrit sur disque, a survécu.
+- Le port 113/tcp (ident) répond par un RST (closed) au lieu d'être filtré comme le reste : à resserrer si on veut un DROP total sur tout sauf 443.
+- Horloge du relais encore décalée au moment des tests : à resynchroniser avant le tournage de la vidéo pour des horodatages cohérents.
