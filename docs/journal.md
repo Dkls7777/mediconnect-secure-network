@@ -384,3 +384,35 @@ Le journal du portail (`/var/log/mediconnect/mfa.log`) trace chaque tentative av
 **Constat à mentionner en limite**
 - La licence de mise à jour des signatures IPS de la maquette est expirée (alarmes « Active Update: your license has expired ») : les signatures ne sont plus mises à jour.
 - Le relais sortant partage la DMZ des relais entrants ; en production, une DMZ dédiée aux flux sortants.
+
+## 05/10/2026 (fin d'après-midi) : journalisation centralisée
+
+**Objectif** : ANSSI R26. Un équipement compromis ne doit pas pouvoir effacer ses propres traces : une copie des journaux part vers un collecteur situé dans la zone la mieux protégée.
+
+**Fait**
+- Collecteur rsyslog en zone ADMIN, adresse dédiée 10.10.99.20 (hébergé sur le serveur d'administration), écoute UDP 514, un fichier par équipement émetteur dans `/var/log/mediconnect/central/`
+- Pare-feu externe : profil syslog `Collecteur_ADMIN` vers `srv_logs`, UDP, format RFC 5424
+- Pare-feu interne : journalisation distante de tous ses journaux, émise depuis son interface ADMIN ; règle TRANSIT dédiée pour laisser entrer les journaux du pare-feu externe (10.255.0.1 vers 10.10.99.20, UDP 514)
+- Horloge du collecteur remise à l'heure
+
+**Vérification**
+- Deux fichiers créés : `10.10.99.254.log` (pare-feu interne) et `10.255.0.1.log` (pare-feu externe)
+- Exemple de trace centralisée : activation de configuration sur le pare-feu externe par `admin` depuis `10.10.99.10`, donc depuis le bastion. Administration séparée et journalisation se confirment l'une l'autre.
+
+**Journal du relais sortant (même séance)**
+- Tunnel coupé par l'IPS (code 000), domaine refusé (TCP_DENIED/403), tunnel HTTPS établi (TCP_TUNNEL/200), avec l'adresse du poste émetteur
+
+**Limites à mentionner**
+- Transport syslog en UDP, sans chiffrement ni authentification ; en production, TLS (RFC 5425) et stockage protégé en écriture
+- Le collecteur partage une machine avec le bastion ; en production, deux serveurs distincts
+- Les journaux des serveurs de la DMZ (relais, portail MFA, relais sortant) restent locaux : les collecter imposerait un flux initié depuis la DMZ vers le SI interne, à traiter par un collecteur intermédiaire (R7)
+
+**État de la politique du pare-feu interne, interface TRANSIT**
+
+| Source | Destination | Service | Rôle |
+|---|---|---|---|
+| RP_DMZ | 172.16.20.10 | TCP 8443 | Relais vers application |
+| 10.20.10.0/24 | SERVEURS | TCP 443, ICMP echo | Site B par IPsec |
+| 10.60.0.0/24 | SERVEURS | TCP 443 | Nomades VPN SSL |
+| 10.60.0.0/24 | 10.10.99.10 | TCP 22 | Administrateurs VPN vers bastion |
+| 10.255.0.1 | 10.10.99.20 | UDP 514 | Journaux du pare-feu externe |
