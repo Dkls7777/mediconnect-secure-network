@@ -19,28 +19,40 @@ Conception et mise en œuvre de l'architecture réseau d'une plateforme de prise
 
 ```mermaid
 flowchart TB
-    NET((Internet<br/>192.36.253.0/24))
-    EXT[FW-EXT siège<br/>Stormshield SNS]
-    B[FW-B site secondaire<br/>Stormshield SNS]
+    NET((Internet<br/>192.36.253.0/24<br/>patients, médecins, nomades))
+    EXT[FW-EXT siège<br/>Stormshield SNS<br/>.10 VPN / .11 patients / .12 médecins]
     INT[FW-INT siège<br/>pfSense]
-    RELAIS[DMZ relais<br/>RP patients / RP médecins + MFA<br/>172.16.10.0/24]
-    DEMO[DEMO<br/>172.16.30.0/24]
-    APP[SRV-APP<br/>172.16.20.0/24]
-    LAN[LAN siège<br/>10.10.10.0/24]
-    SRV[Serveurs internes<br/>10.10.20.0/24]
-    ADM[Admin + logs<br/>10.10.99.0/24]
-    LANB[LAN site B<br/>10.20.10.0/24]
+    subgraph SI[SI interne du siège]
+        APP[SRV-APP<br/>172.16.20.0/24<br/>Application .10]
+        LAN[LAN siège<br/>10.10.10.0/24]
+        SRV[Serveurs internes<br/>10.10.20.0/24<br/>CRM, Compta, Support]
+        ADM[ADMIN<br/>10.10.99.0/24<br/>Bastion, Collecteur]
+    end
+    subgraph DMZ[DMZ relais 172.16.10.0/24]
+        RPP[Relais patients<br/>.10]
+        RPM[Relais médecins<br/>+ MFA .11]
+        PRX[Relais sortant<br/>Squid .20]
+    end
+    DEMO[DEMO<br/>172.16.30.0/24<br/>via VPN seulement]
+    VPN[Nomades VPN SSL<br/>10.60.0.0/24]
+    subgraph SITEB[Site B]
+        B[FW-B<br/>Stormshield SNS<br/>192.36.253.20]
+        LANB[LAN site B<br/>10.20.10.0/24]
+    end
 
     NET --- EXT
-    NET --- B
-    EXT -. IPsec .- B
-    EXT --- RELAIS
-    EXT --- DEMO
-    EXT ---|transit 10.255.0.0/30| INT
+    EXT ----|transit 10.255.0.0/30| INT
     INT --- APP
     INT --- LAN
     INT --- SRV
     INT --- ADM
+    EXT --- RPP
+    EXT --- RPM
+    EXT --- PRX
+    EXT --- DEMO
+    EXT -.- VPN
+    EXT -. tunnel IPsec .- B
+    NET --- B
     B --- LANB
 ```
 
@@ -75,7 +87,7 @@ Voir [docs/journal.md](docs/journal.md).
 | 5. VPN SSL, annuaire, règles par identité, MFA | Fait : VPN SSL avec droits par groupe, MFA TOTP devant l'espace médecins |
 | 6. Administration sécurisée (bastion) | Fait : administration des deux pare-feux uniquement par le bastion, interdite depuis le LAN |
 | 7. Contrôle applicatif et journalisation | Fait : profil IPS dédié, journaux des deux pare-feux centralisés en zone ADMIN ; tests d'attaque réalisés depuis Kali |
-| 8. Tests, rapport, vidéo | En cours : tests d'attaque réalisés (Kali, 7 scénarios : scan, contrôle d'accès, MFA, journalisation) ; rapport et vidéo à faire |
+| 8. Tests, rapport, vidéo | Tests d'attaque réalisés (Kali) ; rapport rédigé (`rapport/Rapport_MediConnect_DOSSOU_Sam.pdf`) ; vidéo à faire |
 
 ## Structure du dépôt
 
@@ -84,7 +96,7 @@ docs/        cadrage, journal de bord, choix d'architecture
 lab/         scripts de construction de l'environnement VirtualBox
 configs/     exports de configuration nettoyés (sans secrets)
 tests/       scénarios de test et résultats
-diagrams/    schémas d'architecture
+diagrams/    schéma d'architecture (source Mermaid et image)
 rapport/     rapport final
 ```
 
