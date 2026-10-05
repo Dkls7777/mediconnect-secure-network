@@ -308,6 +308,49 @@
 - Authentification du bastion par mot de passe ; en production, clés SSH et second facteur, journalisation des sessions
 - Les serveurs de la DMZ ne sont pas encore administrables depuis le bastion
 
+**Administrateurs en VPN SSL**
+- `srv_bastion` ajouté au groupe `vpn_ressources` ; règle de filtrage n° 12 : `administrateurs@mediconnect.lab`, via le tunnel VPN SSL, vers `srv_bastion` en SSH uniquement ; blocage final en n° 13
+- pfSense, interface TRANSIT : 10.60.0.0/24 vers 10.10.99.10 en SSH
+- Test : paul.admin connecté en VPN (10.60.0.6) ouvre une session SSH sur le bastion
+
 **À faire ensuite**
-- Groupe administrateurs du VPN SSL : accès au bastion uniquement
-- Synchroniser les horloges des pare-feux (décalées après les mises en pause)
+- Synchroniser les horloges des pare-feux et des postes (décalées après les mises en pause)
+- MFA des médecins
+
+## 05/10/2026 : authentification à deux facteurs des médecins
+
+**Objectif** : le sujet demande pour les médecins un accès distinct de celui des patients, avec un niveau de sécurité supérieur et une MFA.
+
+**Fait**
+- Portail d'authentification `mc-mfa` installé sur le serveur relais, devant `/pro/` : mot de passe et code TOTP (RFC 6238, 6 chiffres, 30 secondes)
+- nginx : directive `auth_request` avant toute requête vers l'espace professionnel ; sans session valide, redirection vers la page de connexion
+- Base d'utilisateurs locale à la DMZ, sans appel à un annuaire interne (ANSSI R10)
+- Service sous un compte dédié `mcmfa`, système de fichiers en lecture seule (durcissement systemd)
+- Mesures intégrées : empreinte PBKDF2-SHA256 salée des mots de passe, cookie de session signé (`Secure`, `HttpOnly`, `SameSite=Strict`, 15 minutes), blocage 5 minutes après 5 échecs, refus du rejeu d'un code, message d'erreur identique que l'identifiant existe ou non, journal des tentatives sans mot de passe ni code
+- Médecin de test `dr.dupont`, second facteur dans une application d'authentification sur téléphone
+
+**Vérifications avant déploiement**
+- Calcul TOTP conforme aux vecteurs de test de la RFC 6238
+- Scénarios testés hors maquette : code valide, code faux, mot de passe faux, rejeu, blocage, cookie falsifié
+
+**Tests depuis Internet (poste 192.36.253.100)**
+
+| Essai | Résultat |
+|---|---|
+| https://192.36.253.12 sans session | Redirection vers le portail de connexion |
+| Bon mot de passe, code faux | Refusé |
+| Bon mot de passe, code du téléphone | Espace professionnel affiché |
+| https://192.36.253.11 (patients) | Accessible sans authentification |
+
+**Difficultés et leçons**
+- Déploiement : le relais est injoignable depuis l'hôte (DMZ). Carte basculée temporairement en NAT avec une adresse provisoire, puis rebranchée sur la DMZ.
+- Horloge : le serveur avait plus d'un jour de retard après les mises en pause. Le TOTP dépend de l'heure, l'horloge a été remise à l'heure avant l'enrôlement. En production : synchronisation NTP obligatoire.
+- Secret TOTP affiché par erreur hors du serveur pendant l'enrôlement : un secret exposé se remplace, il ne se « protège » pas après coup.
+
+**Limites à mentionner**
+- Service minimal écrit pour la maquette ; en production, fournisseur d'identité éprouvé et clés matérielles FIDO2
+- Compteurs d'échecs en mémoire, remis à zéro au redémarrage du service
+- Pas encore de synchronisation d'heure automatique dans la maquette
+
+**À faire ensuite**
+- Remise à l'heure des pare-feux, IPS et journalisation centralisée

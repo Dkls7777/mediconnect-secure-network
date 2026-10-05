@@ -72,7 +72,7 @@ Voir [docs/journal.md](docs/journal.md).
 | 2. Socle lab (VM, réseaux, interfaces, routage) | Fait pour le siège (site B à faire) |
 | 3. DMZ, reverse proxies, zone DEMO | Fait : deux services publiés, filtrage restrictif, DEMO isolée et réservée au VPN (relais sortant à faire) |
 | 4. VPN IPsec site à site | Fait : tunnel site B vers zone SERVEURS, applications internes atteintes en HTTPS |
-| 5. VPN SSL, annuaire, règles par identité, MFA | VPN SSL et filtrage par groupe validés par tests croisés (commerciaux, comptabilité) ; MFA à faire |
+| 5. VPN SSL, annuaire, règles par identité, MFA | Fait : VPN SSL avec droits par groupe, MFA TOTP devant l'espace médecins |
 | 6. Administration sécurisée (bastion) | Fait : administration des deux pare-feux uniquement par le bastion, interdite depuis le LAN |
 | 7. Contrôle applicatif et journalisation | À faire |
 | 8. Tests, rapport, vidéo | À faire |

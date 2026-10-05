@@ -1,0 +1,17 @@
+[Unit]
+Description=MediConnect - portail MFA de l'espace medecins
+After=network.target
+
+[Service]
+User=mcmfa
+Group=mcmfa
+ExecStart=/usr/local/sbin/mc-mfa serve
+Restart=on-failure
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/log/mediconnect
+
+[Install]
+WantedBy=multi-user.target

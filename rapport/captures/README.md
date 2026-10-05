@@ -104,3 +104,9 @@
 | 100-fw-ext-administration-reservee-au-bastion.png | Pare-feu externe : seul srv_bastion est autorisé à accéder aux pages d'administration ; protection contre la force brute active (3 essais) | Administration sécurisée (ANSSI R16) |
 | 101-lan-administration-directe-refusee.png | Depuis un poste du LAN, sans passer par le bastion : aucune réponse des interfaces d'administration des deux pare-feux (code 000) | Administration sécurisée / tests réalisés |
 | 102-fw-int-regles-lan-separation-administration.png | pfSense, interface LAN : seul le poste d'administration peut joindre le bastion en SSH ; zone ADMIN et administration des pare-feux interdites au LAN, journalisées | Administration sécurisée (ANSSI R16) |
+| 103-vpn-ssl-paul-admin-rebond-bastion.png | Administrateur d'astreinte en VPN SSL (paul.admin, adresse 10.60.0.6) : seule destination permise, le bastion en SSH | Administration sécurisée / accès distant |
+| 104-mfa-medecins-page-connexion.png | Depuis Internet, l'adresse des médecins renvoie d'abord vers le portail d'authentification renforcée | Accès authentifié des médecins (MFA) |
+| 105-mfa-medecins-saisie-deux-facteurs.png | Saisie des deux facteurs : mot de passe et code à usage unique de l'application d'authentification (code expiré, sans valeur) | Accès authentifié des médecins (MFA) |
+| 106-mfa-medecins-espace-pro-apres-authentification.png | Espace professionnel affiché après authentification à deux facteurs réussie | Accès authentifié des médecins (MFA) |
+| 107-portail-patients-sans-authentification.png | Le portail patients reste public, sans authentification : deux chaînes, deux niveaux de sécurité (ANSSI R6) | Exposition sécurisée de la plateforme |
+| 108-mfa-medecins-code-invalide-refuse.png | Bon identifiant et bon mot de passe mais code à usage unique faux : accès refusé, message volontairement non précis | Accès authentifié des médecins (MFA) / tests réalisés |
