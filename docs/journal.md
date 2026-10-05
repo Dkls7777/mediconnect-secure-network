@@ -342,10 +342,11 @@
 | Bon mot de passe, code du téléphone | Espace professionnel affiché |
 | https://192.36.253.11 (patients) | Accessible sans authentification |
 
+Le journal du portail (`/var/log/mediconnect/mfa.log`) trace chaque tentative avec l'adresse réelle du client : LOGIN_OK, LOGOUT, LOGIN_FAIL avec le motif.
+
 **Difficultés et leçons**
 - Déploiement : le relais est injoignable depuis l'hôte (DMZ). Carte basculée temporairement en NAT avec une adresse provisoire, puis rebranchée sur la DMZ.
 - Horloge : le serveur avait plus d'un jour de retard après les mises en pause. Le TOTP dépend de l'heure, l'horloge a été remise à l'heure avant l'enrôlement. En production : synchronisation NTP obligatoire.
-- Secret TOTP affiché par erreur hors du serveur pendant l'enrôlement : un secret exposé se remplace, il ne se « protège » pas après coup.
 
 **Limites à mentionner**
 - Service minimal écrit pour la maquette ; en production, fournisseur d'identité éprouvé et clés matérielles FIDO2
@@ -354,3 +355,32 @@
 
 **À faire ensuite**
 - Remise à l'heure des pare-feux, IPS et journalisation centralisée
+
+## 05/10/2026 (suite) : horloges et relais sortant
+
+**Horloges**
+- Pare-feu externe : synchronisation NTP activée (il est le seul équipement relié à Internet), fuseau GMT. Avant : un jour et demi de retard après les mises en pause.
+- Pare-feu interne : remis à l'heure à la main. Sans route vers Internet (R19), il ne peut pas joindre une source de temps externe. En production : serveur NTP interne.
+
+**Relais sortant**
+- `MC-SRV-PROXY` (172.16.10.20), Squid 6.13, en DMZ. Politique : seul le LAN du siège, ports 80 et 443, CONNECT vers 443 uniquement, liste de domaines refusés, journal de chaque requête, adresse interne et version non divulguées.
+- Pare-feu externe, trois règles : LAN vers relais (TCP 3128), relais vers Internet (http, https), relais vers deux résolveurs DNS nommés (dns_udp). Une règle de NAT masque le relais derrière l'adresse publique du pare-feu (R21).
+
+**Difficulté : l'IPS coupe le flux légitime**
+- Symptôme : la sortie directe échoue (attendu), un domaine interdit renvoie 403 (attendu), mais un site HTTPS par le relais donne « Connection reset by peer ».
+- Raisonnement : le relais répond puisqu'il renvoie un 403. Une coupure nette n'est pas le comportement de Squid en erreur, c'est celui d'un équipement intermédiaire.
+- Preuve : journal des alarmes du pare-feu externe, « Tunnelling using CONNECT method », action Block, niveau Major, source 10.10.10.2, destination srv_proxy.
+- Correction ciblée : profil d'inspection dédié IPS_05 où cette seule alarme passe en Allow (niveau conservé, donc toujours journalisée), appliqué à la seule règle 5. Les flux venant d'Internet gardent le profil par défaut.
+- Leçon : un IPS se règle flux par flux. On n'affaiblit pas la protection globale pour un besoin local.
+
+**Tests, depuis un poste du LAN**
+
+| Essai | Résultat |
+|---|---|
+| Sortie directe vers Internet | Impossible, aucune route |
+| Site HTTPS par le relais | 200 Connection established, HTTP/2 200 |
+| Domaine de la liste refusée | 403 Forbidden, ERR_ACCESS_DENIED |
+
+**Constat à mentionner en limite**
+- La licence de mise à jour des signatures IPS de la maquette est expirée (alarmes « Active Update: your license has expired ») : les signatures ne sont plus mises à jour.
+- Le relais sortant partage la DMZ des relais entrants ; en production, une DMZ dédiée aux flux sortants.

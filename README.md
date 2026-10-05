@@ -70,7 +70,7 @@ Voir [docs/journal.md](docs/journal.md).
 |---|---|
 | 1. Cadrage (besoins, zones, adressage, matrice des flux) | Fait |
 | 2. Socle lab (VM, réseaux, interfaces, routage) | Fait pour le siège (site B à faire) |
-| 3. DMZ, reverse proxies, zone DEMO | Fait : deux services publiés, filtrage restrictif, DEMO isolée et réservée au VPN (relais sortant à faire) |
+| 3. DMZ, reverse proxies, zone DEMO | Fait : deux services publiés, filtrage restrictif, DEMO isolée et réservée au VPN, relais sortant |
 | 4. VPN IPsec site à site | Fait : tunnel site B vers zone SERVEURS, applications internes atteintes en HTTPS |
 | 5. VPN SSL, annuaire, règles par identité, MFA | Fait : VPN SSL avec droits par groupe, MFA TOTP devant l'espace médecins |
 | 6. Administration sécurisée (bastion) | Fait : administration des deux pare-feux uniquement par le bastion, interdite depuis le LAN |

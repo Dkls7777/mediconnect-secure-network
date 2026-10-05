@@ -110,3 +110,12 @@
 | 106-mfa-medecins-espace-pro-apres-authentification.png | Espace professionnel affiché après authentification à deux facteurs réussie | Accès authentifié des médecins (MFA) |
 | 107-portail-patients-sans-authentification.png | Le portail patients reste public, sans authentification : deux chaînes, deux niveaux de sécurité (ANSSI R6) | Exposition sécurisée de la plateforme |
 | 108-mfa-medecins-code-invalide-refuse.png | Bon identifiant et bon mot de passe mais code à usage unique faux : accès refusé, message volontairement non précis | Accès authentifié des médecins (MFA) / tests réalisés |
+| 109-mfa-journal-des-tentatives.png | Journal du portail MFA : connexions réussies, déconnexion et refus pour code TOTP invalide, avec l'adresse réelle du médecin (192.36.253.100) ; ni mot de passe ni code enregistrés | Journalisation / accès authentifié des médecins |
+| 110-fw-ext-synchronisation-ntp.png | Pare-feu externe synchronisé par NTP (13:51 GMT pour 15:51 à Paris) ; avant, un jour et demi de retard | Journalisation |
+| 111-fw-int-remise-a-l-heure.png | Pare-feu interne remis à l'heure à la main : sans route vers Internet (R19), il ne peut pas joindre une source NTP externe | Journalisation / limites |
+| 112-fw-ext-nat-masquage-relais-sortant.png | NAT : la source du relais sortant est remplacée par l'adresse publique du pare-feu (masquage, ANSSI R21), en plus des deux publications | Relais sortant / NAT |
+| 113-relais-sortant-premier-test-connect-coupe.png | Premier test : sortie directe impossible (aucune route, R19), domaine interdit refusé (403), mais HTTPS par le relais coupé net | Difficultés rencontrées / relais sortant |
+| 114-fw-ext-alarme-ips-tunnelling-connect.png | Journal des alarmes : l'IPS bloque « Tunnelling using CONNECT method » entre le poste du LAN et le relais ; licence de mise à jour des signatures expirée | Contrôle applicatif (IPS) / difficultés rencontrées |
+| 115-fw-ext-profil-ips-05-connect-autorise.png | Profil d'inspection dédié IPS_05 : l'alarme CONNECT passe en Allow, niveau Major conservé pour la traçabilité | Contrôle applicatif (IPS) |
+| 116-fw-ext-regle-5-profil-ips-dedie.png | Règle 5 (LAN vers relais sortant) : seule règle utilisant le profil IPS_05, les autres gardent le profil par défaut | Contrôle applicatif (IPS) / politique de filtrage |
+| 117-relais-sortant-navigation-https-ok.png | Après ajustement : un poste du LAN atteint un site HTTPS à travers le relais sortant (200 Connection established, HTTP/2 200) | Relais sortant / tests réalisés |

@@ -1,0 +1,2 @@
+# Domaines refuses par le relais sortant (exemple de politique de navigation)
+.example.org

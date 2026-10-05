@@ -1,6 +1,6 @@
 #!/bin/bash
 # MediConnect - transforme un clone du modele en serveur d'une zone
-# Usage : sudo mc-role relais | app | demo | interne | admin
+# Usage : sudo mc-role relais | app | demo | interne | admin | proxy
 set -e
 ROLE="$1"
 ALIAS=""
@@ -10,9 +10,13 @@ case "$ROLE" in
   demo)    HN=mc-srv-demo;    IP=172.16.30.10/24; GW=172.16.30.254; DNS=172.16.10.53 ;;
   interne) HN=mc-srv-interne; IP=10.10.20.10/24;  GW=10.10.20.254;  ALIAS="10.10.20.20/24 10.10.20.30/24 10.10.20.40/24"; DNS=10.10.20.53 ;;
   admin)   HN=mc-srv-admin;   IP=10.10.99.10/24;  GW=10.10.99.254;  DNS=10.10.20.53 ;;
-  *) echo "Usage : sudo mc-role relais | app | demo | interne | admin"; exit 1 ;;
+  proxy)   HN=mc-srv-proxy;   IP=172.16.10.20/24; GW=172.16.10.254; DNS=9.9.9.9 ;;
+  *) echo "Usage : sudo mc-role relais | app | demo | interne | admin | proxy"; exit 1 ;;
 esac
 [ "$(id -u)" = "0" ] || { echo "A lancer avec sudo"; exit 1; }
+if [ "$ROLE" = "proxy" ] && ! command -v squid >/dev/null; then
+  echo "ERREUR : squid absent. Installer d'abord : sudo apt-get install -y squid"; exit 1
+fi
 
 IF=$(ip -o link show | awk -F': ' '$2 != "lo" && $2 !~ /^docker/ {print $2; exit}')
 echo "Role $ROLE : $HN, $IP sur $IF, passerelle $GW"
@@ -76,6 +80,15 @@ case "$ROLE" in
     chmod -R a+rX /var/www/interne
     cp /opt/mediconnect/nginx/interne.conf /etc/nginx/sites-enabled/
     echo "net.ipv4.ip_nonlocal_bind=1" > /etc/sysctl.d/90-mediconnect.conf
+    ;;
+  proxy)
+    # Relais sortant : Squid, configuration et liste de domaines refuses
+    sed -i 's/\r$//' /opt/mediconnect/proxy/squid.conf /opt/mediconnect/proxy/mediconnect-interdits.txt
+    install -m 644 /opt/mediconnect/proxy/squid.conf /etc/squid/squid.conf
+    install -m 644 /opt/mediconnect/proxy/mediconnect-interdits.txt /etc/squid/mediconnect-interdits.txt
+    echo "net.ipv4.ip_nonlocal_bind=1" > /etc/sysctl.d/90-mediconnect.conf
+    squid -k parse 2>&1 | grep -iE "error|fatal|warning" || echo "Configuration Squid valide."
+    systemctl enable squid
     ;;
 esac
 
