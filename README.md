@@ -5,6 +5,10 @@ Conception et mise en œuvre de l'architecture réseau d'une plateforme de prise
 
 > L'application web est considérée comme existante. Le projet porte uniquement sur le réseau : segmentation, DMZ, pare-feux, VPN, identité, administration et journalisation.
 
+## Démonstration vidéo
+
+Vidéo de démonstration du projet (~15 min, voix off) : https://youtu.be/NNDpkMGb7w8
+
 ## Objectifs
 
 - Interconnexion sécurisée de deux sites (IPsec)
