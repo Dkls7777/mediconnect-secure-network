@@ -91,7 +91,7 @@ Voir [docs/journal.md](docs/journal.md).
 | 5. VPN SSL, annuaire, règles par identité, MFA | Fait : VPN SSL avec droits par groupe, MFA TOTP devant l'espace médecins |
 | 6. Administration sécurisée (bastion) | Fait : administration des deux pare-feux uniquement par le bastion, interdite depuis le LAN |
 | 7. Contrôle applicatif et journalisation | Fait : profil IPS dédié, journaux des deux pare-feux centralisés en zone ADMIN ; tests d'attaque réalisés depuis Kali |
-| 8. Tests, rapport, vidéo | Tests d'attaque réalisés (Kali) ; rapport rédigé (`rapport/Rapport_MediConnect_DOSSOU_Sam.pdf`) ; vidéo à faire |
+| 8. Tests, rapport, vidéo | Fait : tests d'attaque (Kali), rapport (`rapport/Rapport_MediConnect_DOSSOU_Sam.pdf`), démonstration vidéo (lien en haut du README) ; projet déposé |
 
 ## Structure du dépôt
 
